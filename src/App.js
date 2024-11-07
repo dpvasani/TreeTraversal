@@ -12,23 +12,32 @@ function App() {
   };
 
   const startAnimation = () => {
-    setAnimate(true);
+    // Reset the animation state to false, then immediately set it to true
+    // This forces a re-render and restarts the animation from scratch
+    setAnimate(false);
+    setTimeout(() => {
+      setAnimate(true);
+    }, 0); // Set a timeout to ensure state is reset before being set to true again
   };
 
   return (
-    <div className="flex min-h-screen">
-      <div className="w-1/2 p-4 bg-gray-50 shadow-lg rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Binary Tree</h2>
+    <div className="flex min-h-screen bg-gradient-to-r from-blue-50 to-blue-100">
+      <div className="w-1/2 p-6 bg-white shadow-lg rounded-lg transition-transform transform hover:scale-105 hover:shadow-2xl">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center transition-transform hover:text-blue-600">
+          Binary Tree
+        </h2>
         <StaticTree />
       </div>
 
-      <div className="w-1/2 p-4 bg-gray-50 shadow-lg rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Traversal Animation</h2>
+      <div className="w-1/2 p-6 bg-white shadow-lg rounded-lg transition-transform transform hover:scale-105 hover:shadow-2xl">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center transition-transform hover:text-blue-600">
+          Traversal Animation
+        </h2>
         <div className="mb-4">
-          <label htmlFor="traversal" className="block text-gray-700 mb-2">Choose Traversal Type</label>
+          <label htmlFor="traversal" className="block text-gray-700 mb-2 font-medium">Choose Traversal Type</label>
           <select
             id="traversal"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             onChange={handleTraversalChange}
             value={traversalType}
           >
@@ -39,7 +48,7 @@ function App() {
         </div>
         <button
           onClick={startAnimation}
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+          className="w-full bg-blue-500 text-white p-3 rounded-lg shadow-md hover:bg-blue-600 transition transform hover:scale-105"
         >
           Start Animation
         </button>
