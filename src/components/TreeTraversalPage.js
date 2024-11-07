@@ -1,51 +1,156 @@
-// src/components/TreeTraversalPage.js
-import React, { useState } from 'react';
-import StaticTree from './StaticTree';
-import TraversalAnimation from './TraversalAnimation';
+// src/components/AnimatedTraversal.js
+import React, { useEffect } from 'react';
+import p5 from 'p5';
 
-const TreeTraversalPage = () => {
-  const [traversalType, setTraversalType] = useState('preorder');
-  const [animate, setAnimate] = useState(false);
+function AnimatedTraversal({ traversalType }) {
+  useEffect(() => {
+    const sketch = (p) => {
+      let tree;
+      let traversalOrder = [];
+      let traversalIndex = 0;
+      let isTraversing = false;
+      let currentNode;
 
-  const startAnimation = () => {
-    setAnimate(false); // Reset animation
-    setTimeout(() => setAnimate(true), 100); // Restart animation
-  };
+      // Tree Node class
+      class Node {
+        constructor(value) {
+          this.value = value;
+          this.left = null;
+          this.right = null;
+          this.x = 0;
+          this.y = 0;
+        }
+      }
 
-  return (
-    <div className="flex flex-col lg:flex-row justify-between items-center p-4 gap-4">
-      {/* Static Tree Display */}
-      <div className="w-full lg:w-1/2 border border-gray-300 rounded-lg p-4">
-        <h2 className="text-xl font-semibold mb-4 text-center">Static Tree</h2>
-        <StaticTree />
-      </div>
+      // Tree class with traversal functions
+      class Tree {
+        constructor() {
+          this.root = null;
+        }
 
-      {/* Traversal Animation Display */}
-      <div className="w-full lg:w-1/2 border border-gray-300 rounded-lg p-4">
-        <h2 className="text-xl font-semibold mb-4 text-center">Traversal Animation</h2>
-        <TraversalAnimation traversalType={traversalType} animate={animate} />
-        
-        {/* Controls */}
-        <div className="flex justify-center gap-4 mt-4">
-          <select
-            value={traversalType}
-            onChange={(e) => setTraversalType(e.target.value)}
-            className="p-2 border border-gray-400 rounded-lg"
-          >
-            <option value="preorder">Preorder</option>
-            <option value="inorder">Inorder</option>
-            <option value="postorder">Postorder</option>
-          </select>
-          <button
-            onClick={startAnimation}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-          >
-            Start Animation
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+        insert(value) {
+          const newNode = new Node(value);
+          if (!this.root) {
+            this.root = newNode;
+            this.root.x = p.width / 2;
+            this.root.y = 50;
+          } else {
+            this._insertNode(this.root, newNode);
+          }
+        }
 
-export default TreeTraversalPage;
+        _insertNode(node, newNode, level = 1) {
+          const offset = 60 / level;
+          if (newNode.value < node.value) {
+            if (!node.left) {
+              node.left = newNode;
+              newNode.x = node.x - offset * 100;
+              newNode.y = node.y + 50;
+            } else {
+              this._insertNode(node.left, newNode, level + 1);
+            }
+          } else {
+            if (!node.right) {
+              node.right = newNode;
+              newNode.x = node.x + offset * 100;
+              newNode.y = node.y + 50;
+            } else {
+              this._insertNode(node.right, newNode, level + 1);
+            }
+          }
+        }
+
+        // Traversal functions
+        inorder(node) {
+          if (node !== null) {
+            this.inorder(node.left);
+            traversalOrder.push(node);
+            this.inorder(node.right);
+          }
+        }
+
+        preorder(node) {
+          if (node !== null) {
+            traversalOrder.push(node);
+            this.preorder(node.left);
+            this.preorder(node.right);
+          }
+        }
+
+        postorder(node) {
+          if (node !== null) {
+            this.postorder(node.left);
+            this.postorder(node.right);
+            traversalOrder.push(node);
+          }
+        }
+      }
+
+      p.setup = () => {
+        p.createCanvas(400, 400);
+        tree = new Tree();
+        const values = [50, 30, 20, 40, 70, 60, 80];
+        values.forEach((value) => tree.insert(value));
+        startTraversal(traversalType);
+      };
+
+      p.draw = () => {
+        p.background(255);
+        displayTree(tree.root);
+
+        if (isTraversing && traversalIndex < traversalOrder.length) {
+          currentNode = traversalOrder[traversalIndex];
+          traversalIndex++;
+        } else {
+          isTraversing = false;
+        }
+
+        if (currentNode) {
+          p.fill(255, 0, 0);
+          p.ellipse(currentNode.x, currentNode.y, 30);
+        }
+      };
+
+      const displayTree = (node) => {
+        if (node) {
+          p.fill(0);
+          p.ellipse(node.x, node.y, 30);
+          p.fill(255);
+          p.textAlign(p.CENTER, p.CENTER);
+          p.text(node.value, node.x, node.y);
+
+          if (node.left) {
+            p.line(node.x, node.y, node.left.x, node.left.y);
+            displayTree(node.left);
+          }
+          if (node.right) {
+            p.line(node.x, node.y, node.right.x, node.right.y);
+            displayTree(node.right);
+          }
+        }
+      };
+
+      const startTraversal = (type) => {
+        traversalOrder = [];
+        traversalIndex = 0;
+        currentNode = null;
+
+        if (type === 'inorder') tree.inorder(tree.root);
+        else if (type === 'preorder') tree.preorder(tree.root);
+        else if (type === 'postorder') tree.postorder(tree.root);
+
+        isTraversing = true;
+      };
+    };
+
+    const p5Instance = new p5(sketch);
+
+    return () => {
+      p5Instance.remove();
+    };
+  }, [traversalType]);
+
+  return <div id="p5-canvas" />;
+}
+
+export default AnimatedTraversal;

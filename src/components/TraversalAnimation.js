@@ -1,3 +1,4 @@
+
 // src/components/TraversalAnimation.js
 import React, { useEffect, useState } from 'react';
 import Sketch from 'react-p5';
